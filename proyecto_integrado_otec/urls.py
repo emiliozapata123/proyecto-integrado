@@ -23,6 +23,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("registration/",include("registration.urls")),
     path("",include("curso.urls")),
+    path("pago/",include("pago.urls")),
+    path("inscripcion/",include("certificado.urls")),
+
     
 ]
 urlpatterns+=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

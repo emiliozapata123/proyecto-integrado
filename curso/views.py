@@ -3,7 +3,7 @@ from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
-from registration.models import Profile, Alumno
+from registration.models import Profile, Alumno,Rol
 from curso.models import PreInscripcion, Inscripcion,Curso
 from registration.serializers import UserSerializer,AlumnoSerializer,DocenteSerializer
 from .serializers import PreInscripcionWriteSerializer,PreInscripcionSerializer,CursoSerializer,InscripcionSerializer
@@ -36,18 +36,24 @@ def enviarCorreo(nombre,email,username,password):
     )
     
 class InscripcionView(APIView):
-    # permission_classes = [IsAuthenticated]
     def post(self,request:HttpRequest,id):
         try:
             preinscripcion = PreInscripcion.objects.get(pk=id)
         except PreInscripcion.DoesNotExist:
             return Response({"error":"preinscripcion no encontrado"},status=status.HTTP_404_NOT_FOUND)
         
+        estado = request.data.get("estado")
+        if estado == "Rechazado":
+            preinscripcion.estado="Rechazado"
+            preinscripcion.save()
+            return Response({"mensaje":"se rechazo la preinscripcion"},status=status.HTTP_201_CREATED)
+        
         user = User.objects.filter(email=preinscripcion.correo).first()
         rut = Profile.objects.filter(rut=preinscripcion.rut).first()
         username = preinscripcion.correo.split("@")[0]
         
         password = generarPassword()
+        rol = Rol.objects.get(nombre="Alumno")
         
         if user and rut:
             return Response({"error":"cuenta de alumno ya existe"},status=status.HTTP_400_BAD_REQUEST)
@@ -65,14 +71,13 @@ class InscripcionView(APIView):
             telefono=preinscripcion.telefono,
             direccion=preinscripcion.direccion,
             rut=preinscripcion.rut,
-            rol="alumno",
+            rol=rol,
         )
         alumno = Alumno.objects.create(usuario=profile,fechaNacimiento=preinscripcion.fechaNacimiento)
         
         inscripcion = {
             "alumno":alumno.id,
-            "curso":preinscripcion.cursoInteres.id,
-            "estado":"aprobado"
+            "curso":preinscripcion.cursoInteres.id
         }
         
         serializer = InscripcionSerializer(data=inscripcion)
@@ -93,8 +98,8 @@ class InscripcionView(APIView):
             
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        
-    
+
+
 class PreInscripcionView(APIView):
     def post(self,request:HttpRequest):
         serializer = PreInscripcionWriteSerializer(data=request.data)
@@ -134,6 +139,7 @@ class CursoView(APIView):
                 alumno = inscripcion.alumno
                 alumnos.append({
                     "id":alumno.id,
+                    "inscripcion_id":inscripcion.id,
                     "nombre":alumno.usuario.nombre,
                     "apellido":alumno.usuario.apellido,
                     "rut":alumno.usuario.rut
@@ -181,8 +187,13 @@ class AsignarCursosDocente(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
         
         
+class AprobarCursoView(APIView):
+    def patch(self,request,id):
+        inscripcion = Inscripcion.objects.get(pk=id)
+        inscripcion.estado = "Aprobado"
+        inscripcion.save()
+        return Response({"mensaje":"curso aprobado"},status=status.HTTP_200_OK)
         
-    
     
     
         

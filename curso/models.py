@@ -16,9 +16,15 @@ class Curso(models.Model):
     
 class Inscripcion(models.Model):
     alumno=models.ForeignKey(Alumno,on_delete=models.CASCADE,related_name="inscripciones")
-    curso=models.ForeignKey(Curso,on_delete=models.CASCADE,related_name="inscripciones")
+    curso=models.ForeignKey(Curso,on_delete=models.CASCADE,related_name="inscripciones",blank=True,null=True)
     fecha=models.DateField(auto_now_add=True)
-    estado=models.CharField(max_length=50,default="pendiente")
+    estado=models.CharField(max_length=20,choices=[
+        ("Pendiente","Pendiente"),
+        ("En progreso","En progreso"),
+        ("Aprobado","Aprobado"),
+        ("Reprobado","Reprobado"),
+        ], default="Pendiente"
+    )
     
 class PreInscripcion(models.Model):
     nombre=models.CharField(max_length=100)
@@ -28,8 +34,8 @@ class PreInscripcion(models.Model):
     correo=models.EmailField()
     telefono=models.CharField(max_length=20)
     direccion=models.CharField(max_length=255,blank=True)
-    cursoInteres=models.ForeignKey(Curso,on_delete=models.CASCADE,related_name="preinscripiones")
     fechaPostulacion=models.DateTimeField(auto_now_add=True)
+    cursoInteres=models.ForeignKey(Curso,on_delete=models.CASCADE,blank=True,null=True)
     estado=models.CharField(max_length=20,
                             choices=[
             ("Pendiente", "Pendiente"),

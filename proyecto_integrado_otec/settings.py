@@ -28,6 +28,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Evita cache en páginas autenticadas
+CACHE_MIDDLEWARE_SECONDS = 0
+CACHE_MIDDLEWARE_KEY_PREFIX = ''
+CACHE_MIDDLEWARE_ALIAS = 'default'
+
+
 
 # Application definition
 
@@ -40,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'curso',
+    'certificado',
     'registration',
     'corsheaders',
 ]
@@ -155,3 +165,9 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'emiliozapata952@gmail.com'
 EMAIL_HOST_PASSWORD = ' iocutoytxgxrqvca'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# se instala con pip install transbank-sdk
+# Para modo sandbox (desarrollo)
+WEBPAY_COMMERCE_CODE = "597055555532"   # código de comercio de pruebas
+WEBPAY_API_KEY = "579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C"
+WEBPAY_ENVIRONMENT = "TEST"  # o usar Environment.Integration

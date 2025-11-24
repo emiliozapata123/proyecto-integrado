@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile,Alumno,Docente
+from .models import Profile,Alumno,Docente,Rol
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from curso.serializers import InscripcionSerializer,CursoSerializer
 from django.shortcuts import get_object_or_404
 from curso.utils import generarPassword
 from django.http import HttpRequest
@@ -28,6 +27,10 @@ def enviarCorreo(nombre,email,username,password):
         fail_silently=False,
     )
     
+class RolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Rol
+        fields="__all__"
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,21 +38,19 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id','username']
         
 class ProfileSerializer(serializers.ModelSerializer):
+    rol=RolSerializer()
     class Meta:
         model=Profile
         fields="__all__"
         
 class AlumnoSerializer(serializers.ModelSerializer):
     usuario = ProfileSerializer()
-    inscripciones = InscripcionSerializer(many=True,read_only=True)
     class Meta:
         model=Alumno
-        fields = ["id", "usuario", "fechaNacimiento", "usuario","inscripciones"]
+        fields = ["id", "usuario", "fechaNacimiento"]
         
 class DocenteSerializer(serializers.ModelSerializer):
     usuario = ProfileSerializer(read_only=True)
-    cursos = CursoSerializer(read_only=True,many=True)
-    
     class Meta:
         model=Docente
         fields="__all__"
@@ -67,6 +68,7 @@ class DocenteSerializer(serializers.ModelSerializer):
         
         username = email.split("@")[0]
         password = generarPassword()
+        rol = Rol.objects.get(nombre="Docente")
         
         user = User.objects.create_user(
             username=username,
@@ -78,7 +80,7 @@ class DocenteSerializer(serializers.ModelSerializer):
             nombre=nombre,
             apellido=apellido,
             email=email,
-            rol="docente",
+            rol=rol,
             rut=rut,
             telefono=telefono
         )
