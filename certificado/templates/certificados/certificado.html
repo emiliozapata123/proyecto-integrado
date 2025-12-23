@@ -2,21 +2,28 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
+    <title>Certificado Mejorado</title>
     <style>
-
         body {
-            font-family: "Arial", sans-serif;
-            background: #f3f8ff;
+            font-family: "Montserrat", sans-serif;
+            background: linear-gradient(180deg, #e9f1ff, #f7faff);
             padding: 40px;
         }
 
         .cert-container {
             width: 100%;
             min-height: 1100px;
-            background: white;
-            border: 8px double #0d2b52;
-            padding: 40px 60px;
+            background: #ffffff;
+            border: 10px solid transparent;
+            padding: 50px 70px;
             text-align: center;
+            position: relative;
+            border-radius: 18px;
+            background-image: linear-gradient(#ffffff, #ffffff),
+                radial-gradient(circle at top left, #0fb2f2, #0d2b52);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
         }
 
         h1, h2, h3, h4 {
@@ -25,8 +32,9 @@
         }
 
         .brand-title {
-            font-size: 38px;
-            font-weight: bold;
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: 1px;
         }
 
         .brand-title span {
@@ -34,48 +42,62 @@
         }
 
         .subtitle {
-            margin-top: 5px;
+            margin-top: 8px;
             font-size: 16px;
-            color: #555;
+            color: #4b5563;
         }
 
         .line {
-            width: 85%;
-            height: 2px;
-            background: #4da6ff;
-            margin: 25px auto;
+            width: 80%;
+            height: 3px;
+            background: linear-gradient(90deg, #0fb2f2, #0d2b52);
+            margin: 30px auto;
+            border-radius: 10px;
         }
 
         .cert-main-title {
-            font-size: 32px;
+            font-size: 36px;
             margin-top: 15px;
-            font-weight: bold;
+            font-weight: 800;
+            color: #0d2b52;
+            letter-spacing: 1px;
         }
 
         .otorgado {
-            margin: 15px 0;
-            font-size: 18px;
-            color: #444;
+            margin: 20px 0;
+            font-size: 20px;
+            color: #374151;
         }
 
         .student-name {
-            font-size: 34px;
+            font-size: 40px;
             margin-top: 10px;
-            font-weight: bold;
+            font-weight: 900;
             color: #0d2b52;
         }
 
         .course-title {
-            font-size: 28px;
+            font-size: 30px;
             margin: 25px 0;
-            font-weight: bold;
+            font-weight: 700;
+            color: #0d2b52;
         }
 
         .info-grid {
             display: flex;
             justify-content: space-around;
-            margin-top: 30px;
+            margin-top: 40px;
             font-size: 18px;
+            gap: 20px;
+        }
+
+        .info-box {
+            background: #f0f7ff;
+            padding: 18px 25px;
+            border-radius: 12px;
+            border: 1px solid #c7dbff;
+            width: 28%;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
         }
 
         .info-box p {
@@ -83,7 +105,7 @@
         }
 
         .signatures {
-            margin-top: 80px;
+            margin-top: 90px;
             display: flex;
             justify-content: space-around;
             text-align: center;
@@ -94,22 +116,38 @@
         }
 
         .firma-img {
-            width: 170px;
+            width: 190px;
             height: auto;
             margin-bottom: -10px;
+            opacity: 0.95;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.15));
         }
 
         .signature-line {
             width: 75%;
             height: 2px;
-            background: #555;
-            margin: 10px auto;
+            background: #0d2b52;
+            margin: 14px auto;
         }
 
         .footer {
-            margin-top: 60px;
+            margin-top: 80px;
             font-size: 14px;
-            color: #444;
+            color: #4b5563;
+        }
+
+        /* SELLADO DECORATIVO */
+        .seal {
+            position: absolute;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, #ffd700, #c59f00);
+            border-radius: 50%;
+            opacity: 0.25;
+            filter: blur(1px);
         }
 
     </style>
@@ -118,7 +156,8 @@
 
 <div class="cert-container">
 
-    <!-- TITULO PRINCIPAL -->
+    <div class="seal"></div>
+
     <h1 class="brand-title">Prevy<span>Seg</span></h1>
     <p class="subtitle">Organismo Técnico de Capacitación · Código SENCE: 1237654321</p>
 
@@ -128,17 +167,12 @@
 
     <p class="otorgado">Otorgado a</p>
 
-    <div class="line"></div>
-
-    <!-- NOMBRE ESTUDIANTE -->
     <h2 class="student-name">{{ alumno.usuario.nombre }} {{ alumno.usuario.apellido }}</h2>
 
     <p class="subtitle">Por haber completado satisfactoriamente el curso de</p>
 
-    <!-- NOMBRE DEL CURSO -->
     <h2 class="course-title">{{ curso.nombre }}</h2>
 
-    <!-- INFO GRID -->
     <div class="info-grid">
         <div class="info-box">
             <p><strong>Duración</strong></p>
@@ -156,7 +190,6 @@
         </div>
     </div>
 
-    <!-- FIRMAS -->
     <div class="signatures">
 
         <div class="firma-block">
@@ -175,10 +208,8 @@
 
     </div>
 
-    <!-- PIE -->
     <div class="footer">
-        Certificado N° CERT- CERT-2024-0001234  
-        <br>
+        Certificado N° CERT-2024-0001234<br>
         Santiago, Chile — www.prevyseg.cl
     </div>
 

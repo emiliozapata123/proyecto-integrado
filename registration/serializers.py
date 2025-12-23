@@ -47,7 +47,12 @@ class AlumnoSerializer(serializers.ModelSerializer):
     usuario = ProfileSerializer()
     class Meta:
         model=Alumno
-        fields = ["id", "usuario", "fechaNacimiento"]
+        fields = "__all__"
+        
+class AlumnoWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Alumno
+        fields = "__all__"
         
 class DocenteSerializer(serializers.ModelSerializer):
     usuario = ProfileSerializer(read_only=True)
@@ -60,7 +65,8 @@ class DocenteSerializer(serializers.ModelSerializer):
         request:HttpRequest = self.context.get("request")
         
         nombre = request.data.get("nombre")
-        apellido = request.data.get("apellido")
+        apellidoPaterno = request.data.get("apellidoPaterno")
+        apellidoMaterno = request.data.get("apellidoMaterno")
         rut = request.data.get("rut")
         email = request.data.get("email")
         telefono = request.data.get("telefono")
@@ -78,7 +84,8 @@ class DocenteSerializer(serializers.ModelSerializer):
         profile = Profile.objects.create(
             user=user,
             nombre=nombre,
-            apellido=apellido,
+            apellidoPaterno=apellidoPaterno,
+            apellidoMaterno=apellidoMaterno,
             email=email,
             rol=rol,
             rut=rut,

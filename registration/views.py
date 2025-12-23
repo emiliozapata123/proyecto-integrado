@@ -1,18 +1,21 @@
 from .serializers import CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.decorators import APIView
+from rest_framework.views import APIView
 from .serializers import ProfileSerializer,DocenteSerializer,AlumnoSerializer
 from .models import Profile,Docente,Alumno
 from rest_framework.views import Response
 from rest_framework import status
 from django.http import HttpRequest
 from curso.serializers import InscripcionSerializer
-from curso.models import Inscripcion
+from curso.models import Inscripcion,Curso
+from rest_framework.permissions import IsAuthenticated
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     
 class DocenteView(APIView):
+    [IsAuthenticated]
+
     def get(self,request:HttpRequest,id=None):
         if not id:
             docentes = Docente.objects.all()
@@ -22,7 +25,8 @@ class DocenteView(APIView):
                 data.append({
                     "id":docente.id,
                     "nombre":docente.usuario.nombre,
-                    "apellido":docente.usuario.apellido,
+                    "apellidoPaterno":docente.usuario.apellidoPaterno,
+                    "apellidoMaterno":docente.usuario.apellidoMaterno,
                     "rut":docente.usuario.rut,
                     "email":docente.usuario.email,
                     "telefono":docente.usuario.telefono,
@@ -37,7 +41,8 @@ class DocenteView(APIView):
         nuevaData = {
             "id":docente.id,
             "nombre":docente.usuario.nombre,
-            "apellido":docente.usuario.apellido,
+            "apellidoPaterno":docente.usuario.apellidoPaterno,
+            "apellidoMaterno":docente.usuario.apellidoMaterno,
             "rut":docente.usuario.rut,
             "email":docente.usuario.email,
             "telefono":docente.usuario.telefono,
@@ -66,18 +71,20 @@ class DocenteView(APIView):
     
     
 class AlumnoView(APIView):
+    [IsAuthenticated]
+
     def get(self,request,id=None):
         if id:
             alumno = Alumno.objects.get(pk=id)
             data = {
                 "id":alumno.id,
                 "nombre":alumno.usuario.nombre,
-                "apellido":alumno.usuario.apellido,
+                "apellidoPaterno":alumno.usuario.apellidoPaterno,
+                "apellidoMaterno":alumno.usuario.apellidoMaterno,
                 "telefono":alumno.usuario.telefono,
                 "email":alumno.usuario.email,
                 "rut":alumno.usuario.rut,
                 "direccion":alumno.usuario.direccion,
-                "fechaNacimiento":alumno.fechaNacimiento,
                 "fechaInscripcion":alumno.fechaInscripcion,
                 "cursos":[]
             }
@@ -98,8 +105,10 @@ class AlumnoView(APIView):
                         "docente":{
                             "id":curso.docente.id,
                             "nombre":curso.docente.usuario.nombre,
-                            "apellido":curso.docente.usuario.apellido
-                        }
+                            "apellidoPaterno":alumno.usuario.apellidoPaterno,
+                            "apellidoMaterno":alumno.usuario.apellidoMaterno,
+                            
+                        } if curso.docente else None
                     })
             return Response(data,status=status.HTTP_200_OK)
         
@@ -110,12 +119,12 @@ class AlumnoView(APIView):
             alumnoList = {
                 "id":alumno.id,
                 "nombre":alumno.usuario.nombre,
-                "apellido":alumno.usuario.apellido,
+                "apellidoPaterno":alumno.usuario.apellidoPaterno,
+                "apellidoMaterno":alumno.usuario.apellidoMaterno,
                 "telefono":alumno.usuario.telefono,
                 "email":alumno.usuario.email,
                 "rut":alumno.usuario.rut,
                 "direccion":alumno.usuario.direccion,
-                "fechaNacimiento":alumno.fechaNacimiento,
                 "fechaInscripcion":alumno.fechaInscripcion,
                 "cursos":[]
             }
@@ -136,25 +145,31 @@ class AlumnoView(APIView):
                         "docente":{
                             "id":curso.docente.id,
                             "nombre":curso.docente.usuario.nombre,
-                            "apellido":curso.docente.usuario.apellido
-                        }
+                            "apellidoPaterno":curso.docente.usuario.apellidoPaterno,
+                            "apellidoMaterno":curso.docente.usuario.apellidoMaterno,
+                        } if curso.docente else None
                     })
             data.append(alumnoList)
         return Response(data,status=status.HTTP_200_OK)
     
 class AlumnoInscripcionView(APIView):
+    [IsAuthenticated]
+
     def get(self,request):
         alumno = request.user.profile.alumno
         data = {
             "id":alumno.id,
             "nombre":alumno.usuario.nombre,
-            "apellido":alumno.usuario.apellido,
+            "apellidoPaterno":alumno.usuario.apellidoPaterno,
+            "apellidoMaterno":alumno.usuario.apellidoMaterno,
             "email":alumno.usuario.email,
             "rut":alumno.usuario.rut,
             "cursos":[]
         }
         
+        contador = 0
         for inscripcion in alumno.inscripciones.all():
+            contador +=1
             curso = inscripcion.curso
             if not curso:
                 continue
@@ -164,14 +179,21 @@ class AlumnoInscripcionView(APIView):
                     "nombre":curso.nombre,
                     "descripcion":curso.descripcion,
                     "cupo":curso.cupo,
+                    "categoria":curso.categoria,
+                    "horas":curso.horas,
                     "precio":curso.precio,
                     "fecha":inscripcion.fecha,
-                    "estado":inscripcion.estado
+                    "estado":inscripcion.estado,
+                    "imagen":curso.imagen.url,
+                    "inscripciones":contador,
+                    "docente":curso.docente.usuario.nombre if curso.docente else None
                 })
             
         return Response(data,status=status.HTTP_200_OK)
     
 class CertificadoEstudianteView(APIView):
+    [IsAuthenticated]
+
     def get(self, request):
         alumno = request.user.profile.alumno
         inscripciones = Inscripcion.objects.filter(alumno=alumno,estado="Aprobado")
@@ -189,9 +211,10 @@ class CertificadoEstudianteView(APIView):
                 "docente":{
                     "id":curso.docente.id,
                     "nombre":curso.docente.usuario.nombre,
-                    "apellido":curso.docente.usuario.apellido,
+                    "apellidoPaterno":curso.docente.usuario.apellidoPaterno,
+                    "apellidoMaterno":curso.docente.usuario.apellidoMaterno,
                     "rut":curso.docente.usuario.rut
-                },
+                } if curso.docente else None,
                 "fecha":i.fecha,
                 "certificado": i.certificado.certificado.url if hasattr(i, "certificado") else None
             }
@@ -199,3 +222,29 @@ class CertificadoEstudianteView(APIView):
         
         return Response(data,status=status.HTTP_200_OK)
         
+
+class AlumnoCursoView(APIView):
+    [IsAuthenticated]
+
+    def get(self,request,id):
+        curso = Curso.objects.get(pk=id)
+        inscripciones = Inscripcion.objects.filter(curso=curso)
+
+        alumnos = []
+        for inscripcion in inscripciones:
+            alumno = inscripcion.alumno
+            data = {
+                "id":alumno.id,
+                "nombre":alumno.usuario.nombre,
+                "apellidoPaterno":alumno.usuario.apellidoPaterno,
+                "apellidoMaterno":alumno.usuario.apellidoMaterno,
+                "telefono":alumno.usuario.telefono,
+                "correo":alumno.usuario.email,
+                "rut":alumno.usuario.rut,
+                "fechaNacimiento":alumno.usuario.fechaNacimiento,
+                "direccion":alumno.usuario.direccion,
+                "fechaInscripcion":alumno.fechaInscripcion,
+                "curso":curso.nombre
+            }
+            alumnos.append(data)
+        return Response(alumnos,status=status.HTTP_200_OK)

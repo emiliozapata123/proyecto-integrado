@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CustomTokenObtainPairView,DocenteView,AlumnoView,AlumnoInscripcionView,CertificadoEstudianteView
+from .views import CustomTokenObtainPairView,DocenteView,AlumnoView,AlumnoInscripcionView,CertificadoEstudianteView,AlumnoCursoView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -12,6 +12,8 @@ urlpatterns = [
     path("estudiante/<int:id>/detail",AlumnoView.as_view(),name="alumno-detail"),
     path("estudiante/inscripciones/",AlumnoInscripcionView.as_view(),name="alumno-inscripciones"),
     path("certificados/estudiante/",CertificadoEstudianteView.as_view(),name="certificado-estudiante"),
+    path("estudiante/curso/<int:id>/list/",AlumnoCursoView.as_view()),
+
     
     
 ]

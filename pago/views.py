@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from rest_framework.decorators import APIView
+from rest_framework.views import APIView
 from registration.models import Alumno
 from curso.models import Curso, Inscripcion
 from rest_framework.response import Response
@@ -16,6 +16,8 @@ class IniciarPagoView(APIView):
             curso_id = request.data.get("curso_id")
             
             curso = Curso.objects.get(pk=curso_id)
+            if curso.cupo == 0:
+                return Response({"error":"no hay cupo"},status=400)
             
             total = float(curso.precio)
             
@@ -79,14 +81,11 @@ class ConfirmarPagoView(APIView):
                     curso=curso,
                     estado="En progreso"
                 )
+                curso.cupo -=1
+                curso.save()
 
                 return redirect(f"http://localhost:3000/pago-exitoso/?token_ws={token}")
-                # return Response({
-                #     "status": "success",
-                #     "mensaje": "Pago autorizado e inscripción creada",
-                #     "curso": curso.nombre
-                    
-                # })
+               
             return Response({
                 "status": "failed",
                 "mensaje": f"Pago rechazado ({response['status']})"
